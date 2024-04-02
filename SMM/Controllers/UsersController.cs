@@ -35,11 +35,31 @@ namespace SMM.Controllers
         }
         
         [HttpPost("login")]
-        //auth services jo kam ho it is a mistake
-        //public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
-        //{
-        //    var user = _db.ApplicationUsers.FirstOrDefault(u=>u.UserName.ToLower()==loginRequestDTO.UserName.ToLower());
-        //    bool isValid = await _userManager.CheckPasswordAsync
-        //}
+        public async Task<IActionResult> Login(LoginRequestDTO model)
+        {
+            var loginResponse = await _authService.Login(model);
+            if(loginResponse.User == null) 
+            { 
+                _response.Success = false;
+                _response.Message = "Username or password is incorrect";
+                return BadRequest(_response);
+
+            }
+            _response.Result = loginResponse;
+            return Ok(_response);
+        }
+        [HttpPost("AssignRole")]
+        public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDTO model)
+        {
+            var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.Role.ToUpper());
+            if(!assignRoleSuccessful) 
+            { 
+                _response.Success = false;
+                _response.Message = "Error encountered";
+                return BadRequest(_response);
+
+            }
+            return Ok(_response);
+        }
     }
 }
